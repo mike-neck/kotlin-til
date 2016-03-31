@@ -1,0 +1,48 @@
+buildscript {
+    ext.kotlinVersion = '1.0.1-2'
+    ext.springBootVersion = '1.3.3.RELEASE'
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'kotlin'
+apply plugin: 'spring-boot'
+
+jar {
+    baseName = 'kotlin-spring-boot'
+    version = '0.1'
+}
+
+repositories {
+    jcenter()
+}
+
+sourceSets {
+    main {
+        kotlin {
+            srcDir 'src/main/kotlin'
+        }
+    }
+    test {
+        kotlin {
+            srcDir 'src/test/kotlin'
+        }
+    }
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    testCompile 'junit:junit'
+}
+
+springBoot {
+    mainClass = 'com.sample.App'
+}
