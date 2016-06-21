@@ -21,3 +21,8 @@ dependencies {
     testCompile 'org.mikeneck:kuickcheck-core:0.1'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 }
+
+task kuickcheck(type: JavaExec, group: 'Verification') {
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'org.mikeneck.kuickcheck.KuickCheck'
+}
