@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.mikeneck.util.state
+package util.state
 
-import org.mikeneck.util.plus
-import org.mikeneck.util.times
+import util.plus
+import util.times
 
 class State<S, out A>(val state: (S) -> Pair<A, S>) {
 
@@ -30,12 +30,10 @@ class State<S, out A>(val state: (S) -> Pair<A, S>) {
 
     fun <B> bind(f: (A) -> State<S, B>): State<S, B> =
             State { state(it).let { f(it.first).state(it.second) } }
-
-    companion object {
-        fun <S, A> ret(x: A): State<S, A> = State { x to it }
-
-        fun <S> put(s: S): State<S, Unit> = State { Unit to s }
-
-        fun <S> get(): State<S, S> = State { it to it }
-    }
 }
+
+fun <S, A> ret(x: A): State<S, A> = State { x to it }
+
+fun <S> put(s: S): State<S, Unit> = State { Unit to s }
+
+fun <S> get(): State<S, S> = State { it to it }

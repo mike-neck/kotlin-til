@@ -13,14 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.mikeneck.util
+package util.state
 
 import org.junit.Test
-import org.mikeneck.util.Command.*
-import org.mikeneck.util.state.State
-import org.mikeneck.util.state.State.Companion.get
-import org.mikeneck.util.state.State.Companion.put
-import org.mikeneck.util.state.State.Companion.ret
+import util.state.Command.*
 import java.util.*
 
 class StateTest {
@@ -81,15 +77,15 @@ fun play(cs: List<Command>): State<Pair<Boolean, Int>, Int> =
             when (c) {
                 is Contents.Empty -> get<Pair<Boolean,Int>>()
                         .bind { ret<Pair<Boolean, Int>, Int>(it.second) }
-                is Contents.Full  -> calc(c.head).bind { play(c.tail) }
+                is Contents.Full -> calc(c.head).bind { play(c.tail) }
             }
         }
 
 fun calc(c: Command): State<Pair<Boolean, Int>, Int> =
         get<Pair<Boolean, Int>>()
                 .map { when(c) {
-                    Command.ADD -> if (it.first) it.first to it.second + 1 else it
-                    Command.SUB -> if (it.first) it.first to it.second - 1 else it
-                    Command.MOD -> !it.first to it.second
+                    ADD -> if (it.first) it.first to it.second + 1 else it
+                    SUB -> if (it.first) it.first to it.second - 1 else it
+                    MOD -> !it.first to it.second
                 } }
                 .bind { p -> put(p).bind { ret<Pair<Boolean, Int>, Int>(p.second) } }
