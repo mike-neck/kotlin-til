@@ -23,7 +23,8 @@ class StateTest {
 
     infix fun <T> T.shouldBe(exp: T): Unit =
             { "Expected [$exp] got [$this]" }
-                    .let { if (this == exp) Unit else throw AssertionError(it) }
+                    .let { (this == exp) to it }
+                    .let { if (it.first == false) throw AssertionError(it.second()) }
 
     val initial = true to 0
 
@@ -37,13 +38,14 @@ class StateTest {
             play(listOf(MOD, ADD, MOD, SUB, SUB, SUB)).eval(initial) shouldBe -3
 
     @Test fun bind() =
-            get<Int>()
+            run { get<Int>() }
                     .bind { put(it) }
-                    .bind { ret<Int, Int>(1) }.runs(3) shouldBe (1 to 3)
+                    .bind { ret<Int, Int>(1) }
+                    .runs(3) shouldBe (1 to 3)
 
     @Test
     fun bind2() =
-            get<Int>()
+            run { get<Int>() }
                     .bind { x -> put(x + 1).bind { ret<Int, Int>(x + 1) } }
                     .bind { get<Int>() }
                     .bind { y -> put(y * 2).bind { ret<Int, Int>(y * 2) } }
@@ -75,17 +77,23 @@ fun <E> list(cs: List<E>): Contents<E> =
 fun play(cs: List<Command>): State<Pair<Boolean, Int>, Int> =
         list(cs).let { c ->
             when (c) {
-                is Contents.Empty -> get<Pair<Boolean,Int>>()
-                        .bind { ret<Pair<Boolean, Int>, Int>(it.second) }
-                is Contents.Full -> calc(c.head).bind { play(c.tail) }
+                is Contents.Empty ->
+                    run { get<Pair<Boolean,Int>>() }
+                            .bind { ret<Pair<Boolean, Int>, Int>(it.second) }
+                is Contents.Full ->
+                    run { calc(c.head) }
+                            .bind { play(c.tail) }
             }
         }
 
 fun calc(c: Command): State<Pair<Boolean, Int>, Int> =
-        get<Pair<Boolean, Int>>()
-                .map { when(c) {
-                    ADD -> if (it.first) it.first to it.second + 1 else it
-                    SUB -> if (it.first) it.first to it.second - 1 else it
-                    MOD -> !it.first to it.second
-                } }
+        run { get<Pair<Boolean, Int>>() }
+                .map  { calc(c, it) }
                 .bind { p -> put(p).bind { ret<Pair<Boolean, Int>, Int>(p.second) } }
+
+fun calc(c: Command, p: Pair<Boolean, Int>): Pair<Boolean, Int> =
+        when (c) {
+            Command.ADD -> if (p.first) p.first to (p.second + 1) else p
+            Command.SUB -> if (p.first) p.first to (p.second - 1) else p
+            Command.MOD -> !p.first to p.second
+        }
