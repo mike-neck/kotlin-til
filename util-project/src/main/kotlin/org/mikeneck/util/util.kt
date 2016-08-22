@@ -58,6 +58,8 @@ infix operator fun <P, R, F: () -> P> F.plus(f: (P) -> R): () -> R = { f(this())
 
 infix operator fun <P, Q, R, F: (P) -> Q> F.plus(f: (Q) -> R): (P) -> R = { f(this(it)) }
 
+infix operator fun <P, Q, F: (P) -> Q> F.times(p: P): Q = this(p)
+
 sealed class Either<L, R> {
 
     abstract val left: L
