@@ -33,14 +33,40 @@ class StateTest {
     @Test fun game3() =
             play(listOf(MOD, ADD, MOD, SUB, SUB, SUB)).eval(initial) shouldBe -3
 
+    /**
+     * This test code is equivalent to that of Haskell shown below.
+     * <pre><code>
+     *     bind = do
+     *         x <- get
+     *         put x
+     *         return 1
+     * 
+     *     test = runState $ bind 3
+     * </code></pre>
+     */
     @Test fun bind() =
             run { get<Int>() }
                     .bind { put(it) }
                     .bind { ret<Int, Int>(1) }
                     .runs(3) shouldBe (1 to 3)
 
-    @Test
-    fun bind2() =
+    /**
+     * This test code is equivalent to that of Haskell shown below.
+     * <pre><code>
+     *     bind2 = do
+     *         x <- get
+     *         let x' = x + 1
+     *         put x'
+     *         return x'
+     *         y <- get
+     *         let y' = y * 2
+     *         put y'
+     *         return y'
+     *
+     *     test = runState $ bind2 1
+     * </code></pre>
+     */
+    @Test fun bind2() =
             run { get<Int>() }
                     .bind { x -> put(x + 1).bind { ret<Int, Int>(x + 1) } }
                     .bind { get<Int>() }
