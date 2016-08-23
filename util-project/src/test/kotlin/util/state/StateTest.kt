@@ -16,15 +16,11 @@
 package util.state
 
 import org.junit.Test
+import util.shouldBe
 import util.state.Command.*
 import java.util.*
 
 class StateTest {
-
-    infix fun <T> T.shouldBe(exp: T): Unit =
-            { "Expected [$exp] got [$this]" }
-                    .let { (this == exp) to it }
-                    .let { if (it.first == false) throw AssertionError(it.second()) }
 
     val initial = true to 0
 
