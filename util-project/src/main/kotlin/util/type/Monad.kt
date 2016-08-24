@@ -15,7 +15,7 @@
  */
 package util.type
 
-interface Monad
+interface Monad: Functor
 
 interface MonadInstance<M: Monad> {
 
