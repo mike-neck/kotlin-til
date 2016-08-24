@@ -30,12 +30,27 @@ fun <T, R> Maybe<T>.bind(f: (T) -> Maybe<R>): Maybe<R> = MaybeInstance.bind(this
 
 sealed class MaybeOf<out T>: Maybe<T> {
 
-    class None<out T>: MaybeOf<T>()
+    data class None<out T>(val zero: Unit = Unit): MaybeOf<T>()
 
     data class Just<out T>(val just: T): MaybeOf<T>()
 } 
 
+interface MaybeSupport<T, in R> {
+    val map: (Maybe<T>) -> (((T) -> R) -> Maybe<R>)
+    val bind: (Maybe<T>) -> (((T) -> Maybe<R>) -> Maybe<R>)
+    val pure: (T) -> Maybe<T>
+}
+
 object MaybeInstance: MonadInstance<MaybeType>, FunctorInstance<MaybeType> {
+
+    fun <T, R> fn(): MaybeSupport<T, R> = object: MaybeSupport<T, R> {
+        override val map: (Bind<MaybeType, T>) -> ((T) -> R) -> Bind<MaybeType, R>
+            get() = { ma -> { fn -> MaybeInstance.map(ma, fn) } }
+        override val bind: (Bind<MaybeType, T>) -> ((T) -> Bind<MaybeType, R>) -> Bind<MaybeType, R>
+            get() = { ma -> { fn -> MaybeInstance.bind(ma, fn) } }
+        override val pure: (T) -> Bind<MaybeType, T>
+            get() = { MaybeInstance.pure(it) }
+    }
 
     override fun <T, R> map(value: Maybe<T>, func: (T) -> R): Maybe<R> =
             when (value) {

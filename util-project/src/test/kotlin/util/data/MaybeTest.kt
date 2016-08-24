@@ -16,6 +16,7 @@
 package util.data
 
 import org.junit.Test
+import util.data.MaybeInstance.fn
 import util.data.MaybeInstance.map
 import util.data.MaybeInstance.pure
 import util.plus
@@ -51,4 +52,26 @@ class MaybeTest {
             pure(listOf("test", "functor", "maybe"))
                     .let { it.fmap(f).fmap(g) to it.fmap(f + g) }
                     .unit { it.first shouldBe it.second }
+
+    /**
+     * A test that [Maybe] satisfies monad law.
+     *
+     * <pre><code>
+     *     return a >>= f = f a
+     * </code></pre>
+     */
+    @Test fun monad1stLaw() =
+            listOf(0, 1, -1, 1000000, -1000000).forEach(satisfies1stLaw)
+
+    val positive: (Int) -> Maybe<Int> = { if (it >= 0) MaybeOf.Just(it) else MaybeOf.None() }
+
+    val satisfies1stLaw: (Int) -> Unit = { returnThenBind(it) shouldBe simplyApply(it) }
+
+    val returnThenBind: (Int) -> Maybe<Int> = fn<Int, Int>().let { (it.pure + it.bind) / positive }
+
+    val simplyApply: (Int) -> Maybe<Int> = positive
 }
+
+infix operator fun <P, Q, R, F:(P) -> ((Q) -> R)> F.div(q: Q): (P) -> R = { p: P -> this(p)(q) }
+
+operator fun <P, Q, R, F:(P, Q) -> R> F.invoke(q: Q): (P) -> R = { p: P -> this(p, q) }
