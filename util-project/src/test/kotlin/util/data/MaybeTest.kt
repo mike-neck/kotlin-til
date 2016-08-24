@@ -54,22 +54,38 @@ class MaybeTest {
                     .unit { it.first shouldBe it.second }
 
     /**
-     * A test that [Maybe] satisfies monad law.
+     * A test that [Maybe] satisfies monad law(Left identity).
      *
      * <pre><code>
      *     return a >>= f = f a
      * </code></pre>
      */
     @Test fun monad1stLaw() =
-            listOf(0, 1, -1, 1000000, -1000000).forEach(satisfies1stLaw)
+            listOf(0, 1, -1, 1000000, -1000000).forEach(satisfyLeftIdentity)
 
     val positive: (Int) -> Maybe<Int> = { if (it >= 0) MaybeOf.Just(it) else MaybeOf.None() }
 
-    val satisfies1stLaw: (Int) -> Unit = { returnThenBind(it) shouldBe simplyApply(it) }
+    val satisfyLeftIdentity: (Int) -> Unit = { returnThenBind(it) shouldBe simplyApply(it) }
 
     val returnThenBind: (Int) -> Maybe<Int> = fn<Int, Int>().let { (it.pure + it.bind) / positive }
 
     val simplyApply: (Int) -> Maybe<Int> = positive
+
+    /**
+     * A test that [Maybe] satisfies monad 2nd law(Right identity).
+     *
+     * <pre><code>
+     *     m >>= return = m
+     * </code></pre>
+     */
+    @Test fun monad2ndLaw() =
+            listOf<Maybe<Maybe<Int>>>(MaybeOf.Just(MaybeOf.Just(1)), MaybeOf.Just(MaybeOf.None()), MaybeOf.None())
+                    .forEach(satisfyRightIdentity)
+
+    val bindReturn: (Maybe<Maybe<Int>>) -> Maybe<Maybe<Int>> =
+            fn<Maybe<Int>, Maybe<Int>>().let { it.bind / it.pure }
+
+    val satisfyRightIdentity: (Maybe<Maybe<Int>>) -> Unit = { bindReturn(it) shouldBe it }
 }
 
 infix operator fun <P, Q, R, F:(P) -> ((Q) -> R)> F.div(q: Q): (P) -> R = { p: P -> this(p)(q) }
