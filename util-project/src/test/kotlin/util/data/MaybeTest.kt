@@ -26,6 +26,13 @@ class MaybeTest {
 
     fun <T> id(): (T) -> T = { it }
 
+    /**
+     * A test that [Maybe] satisfies functor law.
+     *
+     * <pre><code>
+     *     fmap id  = id
+     * </code></pre>
+     */
     @Test fun functor1stLaw() =
             pure("test").let { map(it, id()) } shouldBe pure("test")
 
@@ -33,6 +40,13 @@ class MaybeTest {
 
     val g: (List<Int>) -> Int = { it.sum() }
 
+    /**
+     * A test that [Maybe] satisfies functor law.
+     * 
+     * <pre><code>
+     *     fmap (f . g) = (fmap f) . (fmap g)
+     * </code></pre>
+     */
     @Test fun functor2ndLaw() =
             pure(listOf("test", "functor", "maybe"))
                     .let { it.fmap(f).fmap(g) to it.fmap(f + g) }
