@@ -19,5 +19,5 @@ interface Functor
 
 interface FunctorInstance<F: Functor> {
 
-    fun <T, R> map(value: T, func: (T) -> R): Bind<F, R>
+    fun <T, R> map(value: Bind<F, T>, func: (T) -> R): Bind<F, R>
 }
