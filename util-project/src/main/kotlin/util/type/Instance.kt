@@ -15,9 +15,21 @@
  */
 package util.type
 
-interface Functor
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
 
-interface FunctorInstance<F: Functor>: Instance<F> {
+interface Instance<T>
 
-    fun <T, R> map(value: Bind<F, T>, func: (T) -> R): Bind<F, R>
+abstract class InstanceOf<T> {
+
+    val superType: Type
+
+    init { superType = this.javaClass.genericSuperclass }
+
+    private val asParameterizedType: ParameterizedType
+        get() = superType as ParameterizedType
+
+    @Suppress("UNCHECKED_CAST")
+    val instanceFor: Class<T>
+        get() = asParameterizedType.actualTypeArguments[0] as Class<T>
 }

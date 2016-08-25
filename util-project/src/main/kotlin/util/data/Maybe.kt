@@ -43,6 +43,8 @@ interface MaybeSupport<T, in R> {
 
 object MaybeInstance: MonadInstance<MaybeType>, FunctorInstance<MaybeType> {
 
+    init { MonadInstance.of<MaybeType>().by(this) }
+
     fun <T, R> fn(): MaybeSupport<T, R> = object: MaybeSupport<T, R> {
         override val map: (Bind<MaybeType, T>) -> ((T) -> R) -> Bind<MaybeType, R>
             get() = { ma -> { fn -> MaybeInstance.map(ma, fn) } }
