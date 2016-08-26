@@ -15,7 +15,6 @@
  */
 package util.type
 
-import util.unit
 import kotlin.reflect.KClass
 
 interface Monad: Functor
@@ -28,21 +27,8 @@ interface MonadInstance<M: Monad, I: MonadInstance<M, I>>: Instance<M> {
 
     companion object {
 
-        inline fun <reified M: Monad, I: MonadInstance<M, I>> of(kc: KClass<M> = M::class): ImplementedBy<M, I> =
-                object: ImplementedBy<M, I> {
-                    override fun by(impl: I) = unit { instances[kc] = impl }
-                }
-
-        val instances: MutableMap<KClass<*>, MonadInstance<*, *>> = mutableMapOf()
-
         @Suppress("UNCHECKED_CAST")
-        inline fun <reified M: Monad, reified I: MonadInstance<M, I>> take(kc: KClass<M> = M::class, ic: KClass<I> = I::class): I =
-                instances[kc] as I?
-                        ?: ic.objectInstance
-                        ?: throw IllegalStateException("instance definition for $kc is not registered.")
+        inline fun <M: Monad, reified I: MonadInstance<M, I>> take(ic: KClass<I> = I::class): I =
+                ic.objectInstance ?: throw IllegalStateException("no object instance found.")
     }
-}
-
-interface ImplementedBy<C, in I: Instance<C>> {
-    fun by(impl: I): Unit
 }
