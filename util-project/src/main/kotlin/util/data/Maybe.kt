@@ -15,14 +15,11 @@
  */
 package util.data
 
-import util.type.Bind
-import util.type.FunctorInstance
-import util.type.Monad
-import util.type.MonadInstance
+import util.type.*
 
 interface MaybeType: Monad
 
-typealias Maybe<T> = Bind<MaybeMonad, MaybeType, T>
+typealias Maybe<T> = MonadicBind<MaybeMonad, MaybeType, T>
 
 fun <T, R> Maybe<T>.fmap(f: (T) -> R): Maybe<R> = MaybeMonad.map(this, f)
 

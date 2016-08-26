@@ -16,15 +16,15 @@
 package util
 
 import org.junit.Test
-import util.data.MaybeMonad.pure
-import util.data.MaybeOf
 
 class ActTest {
 
-    @Test fun sucOnMaybe() =
-            act(
-                    { pure(1) },
-                    { pure(it * 2) },
-                    { pure(it + 1) }
-            ) shouldBe MaybeOf.Just(3)
+//    @Test fun sucOnMaybe() =
+//            act(
+//                    { pure(1) },
+//                    { pure(it * 2) },
+//                    { pure(it + 1) }
+//            ) shouldBe MaybeOf.Just(3)
+
+    @Test fun actOnEither(): Unit = TODO()
 }

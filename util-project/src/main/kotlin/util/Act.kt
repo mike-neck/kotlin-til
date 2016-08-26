@@ -15,16 +15,28 @@
  */
 package util
 
-import util.type.Bind
-import util.type.Monad
-import util.type.MonadInstance
+import util.type.*
 
-inline fun <reified M: Monad, reified I: MonadInstance<M, I>, T1, T2, T3> act(
-        noinline f1: () -> Bind<I, M, T1>,
-        noinline f2: (T1) -> Bind<I, M, T2>,
-        noinline f3: (T2) -> Bind<I, M, T3>
+class Act<K: Container.Kind>
+
+fun <K: Container.Kind, C: Container<*, K>> act(): Act<K> = Act()
+
+inline operator fun <reified M: Monad, reified I: MonadInstance<M, I>, T1, T2, T3> Act<Container.Kind.Level2>.invoke(
+        noinline f1: () -> MonadicBind<I, M, T1>,
+        noinline f2: (T1) -> MonadicBind<I, M, T2>,
+        noinline f3: (T2) -> MonadicBind<I, M, T3>
 ): Bind<I, M, T3> =
         MonadInstance.take<M, I>()
+                .let { it to f1() }
+                .let { it.first to (it.first.bind(it.second, f2)) }
+                .let { it.first.bind(it.second, f3) }
+
+inline operator fun <reified M: Monad, reified I: MonadInstance2<M, I>, A, T1, T2, T3> Act<Container.Kind.Level3>.invoke(
+        noinline f1: () -> Bind2<I, M, A, T1>,
+        noinline f2: (T1) -> Bind2<I, M, A, T2>,
+        noinline f3: (T2) -> Bind2<I, M, A, T3>
+): Bind2<I, M, A, T3> =
+        MonadInstance2.take<M, I>()
                 .let { it to f1() }
                 .let { it.first to (it.first.bind(it.second, f2)) }
                 .let { it.first.bind(it.second, f3) }

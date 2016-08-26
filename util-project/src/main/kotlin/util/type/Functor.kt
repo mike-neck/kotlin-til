@@ -21,3 +21,8 @@ interface FunctorInstance<F: Functor, I: FunctorInstance<F, I>>: Instance<F> {
 
     fun <T, R> map(value: Bind<I, F, T>, func: (T) -> R): Bind<I, F, R>
 }
+
+interface FunctorInstance2<F: Functor, I: FunctorInstance2<F, I>>: Instance<F> {
+
+    fun <A, T, R> map(value: Bind2<I, F, A, T>, func: (T) -> R): Bind2<I, F, A, R>
+}

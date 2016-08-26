@@ -15,4 +15,13 @@
  */
 package util.type
 
-interface Bind<I, C, T>
+interface Container<T, K: Container.Kind> {
+    sealed class Kind {
+        class Level2: Kind()
+        class Level3: Kind()
+    }
+}
+
+interface Bind<I, C, T>: Container<T, Container.Kind.Level2>
+
+interface Bind2<I, C, T1, T2>: Container<T2, Container.Kind.Level3>
