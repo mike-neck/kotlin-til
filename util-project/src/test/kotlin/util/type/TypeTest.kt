@@ -18,7 +18,6 @@ package util.type
 import org.junit.Test
 import util.data.MaybeType
 import util.initBy
-import util.shouldBe
 import util.unit
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -33,9 +32,6 @@ class TypeTest {
                     .initBy { it.showRawType() }
                     .initBy { it.showActualTypeArguments() }
                     .unit
-
-    @Test fun instanceTest() =
-            (object : InstanceOf<MaybeType>() {}).instanceFor shouldBe MaybeType::class.java
 }
 
 abstract class Generics<T> {

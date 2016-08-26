@@ -15,21 +15,4 @@
  */
 package util.type
 
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
-
 interface Instance<T>
-
-abstract class InstanceOf<T> {
-
-    val superType: Type
-
-    init { superType = this.javaClass.genericSuperclass }
-
-    private val asParameterizedType: ParameterizedType
-        get() = superType as ParameterizedType
-
-    @Suppress("UNCHECKED_CAST")
-    val instanceFor: Class<T>
-        get() = asParameterizedType.actualTypeArguments[0] as Class<T>
-}
