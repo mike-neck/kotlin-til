@@ -15,4 +15,4 @@
  */
 package util.type
 
-interface Bind<C, T>
+interface Bind<I, C, T>

@@ -22,7 +22,7 @@ import util.type.MonadInstance
 
 interface MaybeType: Monad
 
-typealias Maybe<T> = Bind<MaybeType, T>
+typealias Maybe<T> = Bind<MaybeMonad, MaybeType, T>
 
 fun <T, R> Maybe<T>.fmap(f: (T) -> R): Maybe<R> = MaybeMonad.map(this, f)
 
@@ -41,16 +41,16 @@ interface MaybeSupport<T, in R> {
     val pure: (T) -> Maybe<T>
 }
 
-object MaybeMonad : MonadInstance<MaybeType>, FunctorInstance<MaybeType> {
+object MaybeMonad : MonadInstance<MaybeType, MaybeMonad>, FunctorInstance<MaybeType, MaybeMonad> {
 
-    init { MonadInstance.of<MaybeType>().by(this) }
+    init { MonadInstance.of<MaybeType, MaybeMonad>().by(this) }
 
     fun <T, R> fn(): MaybeSupport<T, R> = object: MaybeSupport<T, R> {
-        override val map: (Bind<MaybeType, T>) -> ((T) -> R) -> Bind<MaybeType, R>
+        override val map: (Maybe<T>) -> ((T) -> R) -> Maybe<R>
             get() = { ma -> { fn -> MaybeMonad.map(ma, fn) } }
-        override val bind: (Bind<MaybeType, T>) -> ((T) -> Bind<MaybeType, R>) -> Bind<MaybeType, R>
+        override val bind: (Maybe<T>) -> ((T) -> Maybe<R>) -> Maybe<R>
             get() = { ma -> { fn -> MaybeMonad.bind(ma, fn) } }
-        override val pure: (T) -> Bind<MaybeType, T>
+        override val pure: (T) -> Maybe<T>
             get() = { MaybeMonad.pure(it) }
     }
 

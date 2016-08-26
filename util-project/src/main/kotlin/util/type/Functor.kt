@@ -17,7 +17,7 @@ package util.type
 
 interface Functor
 
-interface FunctorInstance<F: Functor>: Instance<F> {
+interface FunctorInstance<F: Functor, I: FunctorInstance<F, I>>: Instance<F> {
 
-    fun <T, R> map(value: Bind<F, T>, func: (T) -> R): Bind<F, R>
+    fun <T, R> map(value: Bind<I, F, T>, func: (T) -> R): Bind<I, F, R>
 }

@@ -20,23 +20,23 @@ import kotlin.reflect.KClass
 
 interface Monad: Functor
 
-interface MonadInstance<M: Monad>: Instance<M> {
+interface MonadInstance<M: Monad, I: MonadInstance<M, I>>: Instance<M> {
 
-    fun <T, R> bind(value: Bind<M, T>, func: (T) -> Bind<M, R>): Bind<M, R>
+    fun <T, R> bind(value: Bind<I, M, T>, func: (T) -> Bind<I, M, R>): Bind<I, M, R>
 
-    fun <T> pure(value: T): Bind<M, T>
+    fun <T> pure(value: T): Bind<I, M, T>
 
     companion object {
 
-        inline fun <reified M: Monad> of(kc: KClass<M> = M::class): ImplementedBy<M, MonadInstance<M>> =
-                object: ImplementedBy<M, MonadInstance<M>> {
-                    override fun by(impl: MonadInstance<M>) = unit { instances[kc] = impl }
+        inline fun <reified M: Monad, I: MonadInstance<M, I>> of(kc: KClass<M> = M::class): ImplementedBy<M, I> =
+                object: ImplementedBy<M, I> {
+                    override fun by(impl: I) = unit { instances[kc] = impl }
                 }
 
-        val instances: MutableMap<KClass<*>, MonadInstance<*>> = mutableMapOf()
+        val instances: MutableMap<KClass<*>, MonadInstance<*, *>> = mutableMapOf()
 
         @Suppress("UNCHECKED_CAST")
-        inline fun <reified M: Monad, reified I: MonadInstance<M>> take(kc: KClass<M> = M::class, ic: KClass<I> = I::class): I =
+        inline fun <reified M: Monad, reified I: MonadInstance<M, I>> take(kc: KClass<M> = M::class, ic: KClass<I> = I::class): I =
                 instances[kc] as I?
                         ?: ic.objectInstance
                         ?: throw IllegalStateException("instance definition for $kc is not registered.")

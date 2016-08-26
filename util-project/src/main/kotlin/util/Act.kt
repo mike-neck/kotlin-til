@@ -15,16 +15,16 @@
  */
 package util
 
-import org.junit.Test
-import util.data.MaybeMonad.pure
-import util.data.MaybeOf
+import util.type.Bind
+import util.type.Monad
+import util.type.MonadInstance
 
-class SucTest {
-
-    @Test fun sucOnMaybe() =
-            suc(
-                    { pure(1) },
-                    { pure(it * 2) },
-                    { pure(it + 1) }
-            ) shouldBe MaybeOf.Just(3)
-}
+inline fun <reified M: Monad, reified I: MonadInstance<M, I>, T1, T2, T3> act(
+        noinline f1: () -> Bind<I, M, T1>,
+        noinline f2: (T1) -> Bind<I, M, T2>,
+        noinline f3: (T2) -> Bind<I, M, T3>
+): Bind<I, M, T3> =
+        MonadInstance.take<M, I>()
+                .let { it to f1() }
+                .let { it.first to (it.first.bind(it.second, f2)) }
+                .let { it.first.bind(it.second, f3) }
