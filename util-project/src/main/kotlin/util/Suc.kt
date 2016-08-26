@@ -19,12 +19,12 @@ import util.type.Bind
 import util.type.Monad
 import util.type.MonadInstance
 
-inline fun <reified M: Monad, T1, T2, T3> suc(
+inline fun <reified M: Monad, reified I: MonadInstance<M>, T1, T2, T3> suc(
         noinline f1: () -> Bind<M, T1>,
         noinline f2: (T1) -> Bind<M, T2>,
         noinline f3: (T2) -> Bind<M, T3>
 ): Bind<M, T3> =
-        MonadInstance.take<M, MonadInstance<M>>()
+        MonadInstance.take<M, I>()
                 .let { it to f1() }
                 .let { it.first to (it.first.bind(it.second, f2)) }
                 .let { it.first.bind(it.second, f3) }

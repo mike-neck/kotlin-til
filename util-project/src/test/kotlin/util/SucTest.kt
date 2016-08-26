@@ -16,7 +16,7 @@
 package util
 
 import org.junit.Test
-import util.data.MaybeInstance.pure
+import util.data.MaybeMonad.pure
 import util.data.MaybeOf
 
 class SucTest {

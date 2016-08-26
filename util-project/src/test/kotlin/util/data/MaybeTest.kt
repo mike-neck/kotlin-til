@@ -16,10 +16,10 @@
 package util.data
 
 import org.junit.Test
-import util.data.MaybeInstance.bind
-import util.data.MaybeInstance.fn
-import util.data.MaybeInstance.map
-import util.data.MaybeInstance.pure
+import util.data.MaybeMonad.bind
+import util.data.MaybeMonad.fn
+import util.data.MaybeMonad.map
+import util.data.MaybeMonad.pure
 import util.data.MaybeOf.Just
 import util.data.MaybeOf.None
 import util.plus

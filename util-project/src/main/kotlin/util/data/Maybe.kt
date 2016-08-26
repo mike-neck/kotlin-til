@@ -24,9 +24,9 @@ interface MaybeType: Monad
 
 typealias Maybe<T> = Bind<MaybeType, T>
 
-fun <T, R> Maybe<T>.fmap(f: (T) -> R): Maybe<R> = MaybeInstance.map(this, f)
+fun <T, R> Maybe<T>.fmap(f: (T) -> R): Maybe<R> = MaybeMonad.map(this, f)
 
-fun <T, R> Maybe<T>.bind(f: (T) -> Maybe<R>): Maybe<R> = MaybeInstance.bind(this, f)
+fun <T, R> Maybe<T>.bind(f: (T) -> Maybe<R>): Maybe<R> = MaybeMonad.bind(this, f)
 
 sealed class MaybeOf<out T>: Maybe<T> {
 
@@ -41,17 +41,17 @@ interface MaybeSupport<T, in R> {
     val pure: (T) -> Maybe<T>
 }
 
-object MaybeInstance: MonadInstance<MaybeType>, FunctorInstance<MaybeType> {
+object MaybeMonad : MonadInstance<MaybeType>, FunctorInstance<MaybeType> {
 
     init { MonadInstance.of<MaybeType>().by(this) }
 
     fun <T, R> fn(): MaybeSupport<T, R> = object: MaybeSupport<T, R> {
         override val map: (Bind<MaybeType, T>) -> ((T) -> R) -> Bind<MaybeType, R>
-            get() = { ma -> { fn -> MaybeInstance.map(ma, fn) } }
+            get() = { ma -> { fn -> MaybeMonad.map(ma, fn) } }
         override val bind: (Bind<MaybeType, T>) -> ((T) -> Bind<MaybeType, R>) -> Bind<MaybeType, R>
-            get() = { ma -> { fn -> MaybeInstance.bind(ma, fn) } }
+            get() = { ma -> { fn -> MaybeMonad.bind(ma, fn) } }
         override val pure: (T) -> Bind<MaybeType, T>
-            get() = { MaybeInstance.pure(it) }
+            get() = { MaybeMonad.pure(it) }
     }
 
     override fun <T, R> map(value: Maybe<T>, func: (T) -> R): Maybe<R> =

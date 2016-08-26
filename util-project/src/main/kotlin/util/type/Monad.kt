@@ -36,8 +36,9 @@ interface MonadInstance<M: Monad>: Instance<M> {
         val instances: MutableMap<KClass<*>, MonadInstance<*>> = mutableMapOf()
 
         @Suppress("UNCHECKED_CAST")
-        inline fun <reified M: Monad, I: MonadInstance<M>> take(kc: KClass<M> = M::class): I =
+        inline fun <reified M: Monad, reified I: MonadInstance<M>> take(kc: KClass<M> = M::class, ic: KClass<I> = I::class): I =
                 instances[kc] as I?
+                        ?: ic.objectInstance
                         ?: throw IllegalStateException("instance definition for $kc is not registered.")
     }
 }
