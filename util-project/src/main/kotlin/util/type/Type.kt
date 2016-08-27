@@ -15,4 +15,9 @@
  */
 package util.type
 
-interface Instance<C, I: Instance<C, I>>
+sealed class Type {
+    abstract val kind: String
+    open class Kind1<C, I: Instance<C, I>, T>: Type() { override val kind: String = "* -> *" }
+    open class Kind2<C, I: Instance<C, I>, S, T>: Type() { override val kind: String = "* -> * -> *" }
+    open class Kind3<C, I: Instance<C, I>, S1, S2, T>: Type() { override val kind: String = "* -> * -> * -> *" }
+}
