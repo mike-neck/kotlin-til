@@ -16,17 +16,19 @@
 package util.data
 
 import org.junit.Test
-import util.data.MaybeImpl.Companion.bind
 import util.data.MaybeImpl.Companion.fn
 import util.data.MaybeImpl.Companion.map
 import util.data.MaybeImpl.Companion.pure
+import util.data.MonadLawTestSupport.FunctorIdentity.id
 import util.plus
 import util.shouldBe
 import util.unit
+import util.data.MonadLawTestSupport.FunctorCompositionLaw as FC
+import util.data.MonadLawTestSupport.MonadAssociativity as MA
+import util.data.MonadLawTestSupport.MonadLeftIdentity as LI
+import util.data.MonadLawTestSupport.MonadRightIdentity as RI
 
 class MaybeTest {
-
-    fun <T> id(): (T) -> T = { it }
 
     /**
      * A test that [Maybe] satisfies functor law.
@@ -35,14 +37,12 @@ class MaybeTest {
      *     fmap id  = id
      * </code></pre>
      */
-    @Test fun functor1stLaw() =
-            pure("test").let { map(it, id()) } shouldBe pure("test")
-
-    val f: (List<String>) -> List<Int> = { it.map(String::length) }
+    @Test fun functorIdentity() =
+            listOf(pure("test"), None())
+                    .map { map(it, id()) to it }
+                    .forEach { it.first shouldBe it.second }
 
     val fsp: MaybeSupport<List<String>, List<Int>> = fn()
-
-    val g: (List<Int>) -> Int = { it.sum() }
 
     val gsp: MaybeSupport<List<Int>, Int> = fn()
 
@@ -55,10 +55,9 @@ class MaybeTest {
      *     fmap (f . g) = (fmap f) . (fmap g)
      * </code></pre>
      */
-    @Test fun functor2ndLaw() =
+    @Test fun functorCombination() =
             pure(listOf("test", "functor", "maybe"))
-                    .let { it to (hsp.map(f + g) to  (fsp.map(f) + gsp.map(g))) }
-                    .let { it.second.first(it.first) to it.second.second(it.first) }
+                    .let { hsp.map(FC.f + FC.g)(it) to (fsp.map(FC.f) + gsp.map(FC.g))(it) }
                     .unit { it.first shouldBe it.second }
 
     /**
@@ -68,16 +67,12 @@ class MaybeTest {
      *     return a >>= f = f a
      * </code></pre>
      */
-    @Test fun monad1stLaw() =
-            listOf(0, 1, -1, 1000000, -1000000).forEach(satisfyLeftIdentity)
+    @Test fun monadLeftIdentity() =
+            listOf(0, 1, -1, 1000000, -1000000)
+                    .map { LI.left(positive)(it) to positive(it) }
+                    .forEach { it.first shouldBe it.second }
 
     val positive: (Int) -> Maybe<Int> = { if (it >= 0) Just(it) else None() }
-
-    val satisfyLeftIdentity: (Int) -> Unit = { returnThenBind(it) shouldBe simplyApply(it) }
-
-    val returnThenBind: (Int) -> Maybe<Int> = fn<Int, Int>().let { (it.pure + it.bind)(positive) }
-
-    val simplyApply: (Int) -> Maybe<Int> = positive
 
     /**
      * A test that [Maybe] satisfies monad 2nd law(Right identity).
@@ -86,14 +81,10 @@ class MaybeTest {
      *     m >>= return = m
      * </code></pre>
      */
-    @Test fun monad2ndLaw() =
+    @Test fun monadRightIdentity() =
             listOf(Just(Just(1)), Just(None()), None())
-                    .forEach(satisfyRightIdentity)
-
-    val bindReturn: (Maybe<Maybe<Int>>) -> Maybe<Maybe<Int>> =
-            fn<Maybe<Int>, Maybe<Int>>().let { it.bind(it.pure) }
-
-    val satisfyRightIdentity: (Maybe<Maybe<Int>>) -> Unit = { bindReturn(it) shouldBe it }
+                    .map { RI.left(it) to it }
+                    .forEach { it.first shouldBe it.second }
 
     /**
      * A test that [Maybe] satisfies monad 3rd law(Associativity).
@@ -102,25 +93,13 @@ class MaybeTest {
      *     (m >>= f) >>= g = m >>= (\x -> f x >>= g)
      * </code></pre>
      */
-    @Test fun monad3rdLaw() =
+    @Test fun monadAssociativity() =
             listOf(Just("MaybeOf"), Just(""), None(), Just("maybe"), Just("MAYBE"))
-                    .forEach(satisfyAssociativity)
+                    .map { MA.left(f, g)(it) to MA.right(f, g)(it) }
+                    .forEach { it.first shouldBe it.second }
 
-    val f3: (String) -> Maybe<List<Char>> = { if (it.length > 0) Just(it.toCharArray().toList()) else None() }
+    val f: (String) -> Maybe<List<Char>> = { if (it.length > 0) Just(it.toCharArray().toList()) else None() }
 
-    val g3: (List<Char>) -> Maybe<String> = { it.filter(Char::isUpperCase)
+    val g: (List<Char>) -> Maybe<String> = { it.filter(Char::isUpperCase)
             .let { if (it.size == 0) None() else Just(it.joinToString("")) } }
-
-    val satisfyAssociativity: (Maybe<String>) -> Unit = { bindThenBind(it) shouldBe bindBinding(it) }
-
-    val bindThenBind: (Maybe<String>) -> Maybe<String> =
-            (fn<String, List<Char>>().bind(f3)) + (fn<List<Char>, String>().bind(g3))
-
-    val bindF3G3: (String) -> Maybe<String> = { bind(f3(it), g3) }
-
-    val bindBinding: (Maybe<String>) -> Maybe<String> = fn<String, String>().bind(bindF3G3)
 }
-
-infix operator fun <P, Q, R, F:(P) -> ((Q) -> R)> F.div(q: Q): (P) -> R = { p: P -> this(p)(q) }
-
-operator fun <P, Q, R, F:(P, Q) -> R> F.invoke(q: Q): (P) -> R = { p: P -> this(p, q) }
