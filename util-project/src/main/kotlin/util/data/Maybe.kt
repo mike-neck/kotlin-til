@@ -20,7 +20,7 @@ import util.type.Type
 
 interface MaybeType: Monad
 
-typealias MaybeFunctions = MaybeImpl.Companion
+typealias MaybeMonad = MaybeImpl.Companion
 
 typealias MaybeSupport<T, R> = Monad.Kind1Instance.Support<MaybeType, MaybeImpl.Companion, T, R>
 
