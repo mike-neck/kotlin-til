@@ -22,6 +22,7 @@ import util.data.EitherImpl.Companion.pure
 import util.data.MonadLawTestSupport.FunctorCompositionLaw.f
 import util.data.MonadLawTestSupport.FunctorCompositionLaw.g
 import util.data.MonadLawTestSupport.FunctorIdentity.id
+import util.data.MonadLawTestSupport.MonadLeftIdentity.left
 import util.plus
 import util.shouldBe
 
@@ -58,4 +59,17 @@ class EitherTest {
 
     val rsp2: EitherSupport<String, List<Int>, Int> = fn()
 
+    /**
+     * A test that [Either] satisfies monad law(Left identity).
+     *
+     * <pre><code>
+     *     return a >>= f = f a
+     * </code></pre>
+     */
+    @Test fun monadLeftIdentity() =
+            listOf(0, 1, -1, 1000000, -1000000)
+                    .map { left(onlyPositive)(it) to onlyPositive(it) }
+                    .forEach { it.first shouldBe it.second }
+
+    val onlyPositive: (Int) -> Either<Int, Int> = { if (it < 0) Left(it) else Right(it) }
 }

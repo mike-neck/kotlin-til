@@ -15,6 +15,11 @@
  */
 package util.data
 
+import util.then
+import util.type.Monad
+import util.type.Type
+import kotlin.reflect.KClass
+
 class MonadLawTestSupport {
 
     object FunctorIdentity {
@@ -27,6 +32,24 @@ class MonadLawTestSupport {
     }
 
     object MonadLeftIdentity {
-        
+        inline fun <M: Monad, reified I: Monad.Kind1Instance<M, I>, T, R> left(
+                noinline f: (T) -> Type.Kind1<M, I, R>,
+                kc: KClass<I> = I::class,
+                instance: I? = kc.objectInstance
+        ): (T) -> Type.Kind1<M, I, R> =
+                instance.then { it.fn<T, R>() }
+                        .then { (it.pure + it.bind)(f) }
+                        ?: throw IllegalStateException("instance information is not available.")
+
+        inline fun <M: Monad, reified I: Monad.Kind2Instance<M, I>, S, T, R> left(
+                noinline f: (T) -> Type.Kind2<M, I, S, R>,
+                kc: KClass<I> = I::class,
+                instance: I? = kc.objectInstance
+        ): (T) -> Type.Kind2<M, I, S, R> =
+                instance.then { it.fn<T, S, R>() }
+                        .then { (it.pure + it.bind)(f) }
+                        ?: throw IllegalStateException("instance information is not available.")
     }
 }
+
+infix operator fun <P, Q, R, S, F:(P) -> Q, G: (Q,R) -> S> F.plus(g: G): (P, R) -> S = { p, r -> g(this(p), r) }

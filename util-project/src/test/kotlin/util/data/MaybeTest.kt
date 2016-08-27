@@ -123,6 +123,4 @@ class MaybeTest {
 
 infix operator fun <P, Q, R, F:(P) -> ((Q) -> R)> F.div(q: Q): (P) -> R = { p: P -> this(p)(q) }
 
-infix operator fun <P, Q, R, S, F:(P) -> Q, G: (Q,R) -> S> F.plus(g: G): (P, R) -> S = { p, r -> g(this(p), r) }
-
 operator fun <P, Q, R, F:(P, Q) -> R> F.invoke(q: Q): (P) -> R = { p: P -> this(p, q) }
