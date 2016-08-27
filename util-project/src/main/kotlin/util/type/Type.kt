@@ -17,20 +17,36 @@ package util.type
 
 sealed class Type {
     abstract val kind: String
+
     open class Kind0<C, I: Kind0.Instance<C, I>>: Type() {
         override val kind: String = "*"
-        interface Instance<C, I: Instance<C, I>>
+        interface Instance<C, I: Instance<C, I>> {
+            fun illegalArgument(obj: Kind0<C, I>): Nothing =
+                    throw IllegalArgumentException("not supported this type[${(obj as Any).javaClass}]")
+        }
     }
+
     open class Kind1<C, I: Kind1.Instance<C, I>, T>: Type() {
         override val kind: String = "* -> *"
-        interface Instance<C, I: Instance<C, I>>
+        interface Instance<C, I: Instance<C, I>> {
+            fun <T> illegalArgument(obj: Kind1<C, I, T>): Nothing =
+                    throw IllegalArgumentException("not supported this type[${(obj as Any).javaClass}]")
+        }
     }
+
     open class Kind2<C, I: Kind2.Instance<C, I>, S, T>: Type() {
         override val kind: String = "* -> * -> *"
-        interface Instance<C, I: Instance<C, I>>
+        interface Instance<C, I: Instance<C, I>> {
+            fun <S, T> illegalArgument(obj: Kind2<C, I, S, T>): Nothing =
+                    throw IllegalArgumentException("not supported this type[${(obj as Any).javaClass}]")
+        }
     }
+
     open class Kind3<C, I: Kind3.Instance<C, I>, S1, S2, T>: Type() {
         override val kind: String = "* -> * -> * -> *"
-        interface Instance<C, I: Instance<C, I>>
+        interface Instance<C, I: Instance<C, I>> {
+            fun <S1, S2, T> illegalArgument(obj: Kind3<C, I, S1, S2, T>): Nothing =
+                    throw IllegalArgumentException("not supported this type[${(obj as Any).javaClass}]")
+        }
     }
 }

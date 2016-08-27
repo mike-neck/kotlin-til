@@ -22,6 +22,11 @@ interface Monad: Functor {
     interface Kind1Instance<M: Monad, I: Kind1Instance<M, I>>: Functor.Kind1Instance<M, I> {
         fun <T, R> bind(obj: Kind1<M, I, T>, func: (T) -> Kind1<M, I, R>): Kind1<M, I, R>
         fun <T> pure(value: T): Kind1<M, I, T>
+        override fun <T, R> fn(): Support<M, I, T, R>
+        interface Support<M: Monad, I: Kind1Instance<M, I>, T, R>: Functor.Kind1Instance.Support<M, I, T, R> {
+            val bind: (Kind1<M, I, T>, (T) -> Kind1<M, I, R>) -> Kind1<M, I, R>
+            val pure: (T) -> Kind1<M, I, T>
+        }
     }
 
     interface Kind2Instance<M: Monad, I: Kind2Instance<M, I>>: Functor.Kind2Instance<M, I> {

@@ -114,9 +114,9 @@ class Fun<I, R>(val func: (I) -> R): Kind.Level2<Fun.Companion, I, R>() {
     }
 }
 
-class As<T>
-
 class MapTest {
+
+    class As<T>
 
     @Test fun kind1() =
             run<Pair<Mapper1<Option.Companion>, Option<Int>>> { Option.Companion to Option.pure(100) }

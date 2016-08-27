@@ -16,12 +16,10 @@
 package util.data
 
 import org.junit.Test
-import util.data.MaybeMonad.bind
-import util.data.MaybeMonad.fn
-import util.data.MaybeMonad.map
-import util.data.MaybeMonad.pure
-import util.data.MaybeOf.Just
-import util.data.MaybeOf.None
+import util.data.MaybeImpl.Companion.bind
+import util.data.MaybeImpl.Companion.fn
+import util.data.MaybeImpl.Companion.map
+import util.data.MaybeImpl.Companion.pure
 import util.plus
 import util.shouldBe
 import util.unit
@@ -42,7 +40,13 @@ class MaybeTest {
 
     val f: (List<String>) -> List<Int> = { it.map(String::length) }
 
+    val fsp: MaybeSupport<List<String>, List<Int>> = fn()
+
     val g: (List<Int>) -> Int = { it.sum() }
+
+    val gsp: MaybeSupport<List<Int>, Int> = fn()
+
+    val hsp: MaybeSupport<List<String>, Int> = fn()
 
     /**
      * A test that [Maybe] satisfies functor law.
@@ -53,7 +57,8 @@ class MaybeTest {
      */
     @Test fun functor2ndLaw() =
             pure(listOf("test", "functor", "maybe"))
-                    .let { it.fmap(f).fmap(g) to it.fmap(f + g) }
+                    .let { it to (hsp.map(f + g) to  (fsp.map(f) + gsp.map(g))) }
+                    .let { it.second.first(it.first) to it.second.second(it.first) }
                     .unit { it.first shouldBe it.second }
 
     /**
@@ -70,7 +75,7 @@ class MaybeTest {
 
     val satisfyLeftIdentity: (Int) -> Unit = { returnThenBind(it) shouldBe simplyApply(it) }
 
-    val returnThenBind: (Int) -> Maybe<Int> = fn<Int, Int>().let { (it.pure + it.bind) / positive }
+    val returnThenBind: (Int) -> Maybe<Int> = fn<Int, Int>().let { (it.pure + it.bind)(positive) }
 
     val simplyApply: (Int) -> Maybe<Int> = positive
 
@@ -82,11 +87,11 @@ class MaybeTest {
      * </code></pre>
      */
     @Test fun monad2ndLaw() =
-            listOf<Maybe<Maybe<Int>>>(Just(Just(1)), Just(None()), None())
+            listOf(Just(Just(1)), Just(None()), None())
                     .forEach(satisfyRightIdentity)
 
     val bindReturn: (Maybe<Maybe<Int>>) -> Maybe<Maybe<Int>> =
-            fn<Maybe<Int>, Maybe<Int>>().let { it.bind / it.pure }
+            fn<Maybe<Int>, Maybe<Int>>().let { it.bind(it.pure) }
 
     val satisfyRightIdentity: (Maybe<Maybe<Int>>) -> Unit = { bindReturn(it) shouldBe it }
 
@@ -98,7 +103,7 @@ class MaybeTest {
      * </code></pre>
      */
     @Test fun monad3rdLaw() =
-            listOf<Maybe<String>>(Just("MaybeOf"), Just(""), None(), Just("maybe"), Just("MAYBE"))
+            listOf(Just("MaybeOf"), Just(""), None(), Just("maybe"), Just("MAYBE"))
                     .forEach(satisfyAssociativity)
 
     val f3: (String) -> Maybe<List<Char>> = { if (it.length > 0) Just(it.toCharArray().toList()) else None() }
@@ -109,11 +114,15 @@ class MaybeTest {
     val satisfyAssociativity: (Maybe<String>) -> Unit = { bindThenBind(it) shouldBe bindBinding(it) }
 
     val bindThenBind: (Maybe<String>) -> Maybe<String> =
-            (fn<String, List<Char>>().bind / f3) + (fn<List<Char>, String>().bind / g3)
+            (fn<String, List<Char>>().bind(f3)) + (fn<List<Char>, String>().bind(g3))
 
-    val bindBinding: (Maybe<String>) -> Maybe<String> = fn<String, String>().bind / {x -> bind(f3(x), g3) }
+    val bindF3G3: (String) -> Maybe<String> = { bind(f3(it), g3) }
+
+    val bindBinding: (Maybe<String>) -> Maybe<String> = fn<String, String>().bind(bindF3G3)
 }
 
 infix operator fun <P, Q, R, F:(P) -> ((Q) -> R)> F.div(q: Q): (P) -> R = { p: P -> this(p)(q) }
+
+infix operator fun <P, Q, R, S, F:(P) -> Q, G: (Q,R) -> S> F.plus(g: G): (P, R) -> S = { p, r -> g(this(p), r) }
 
 operator fun <P, Q, R, F:(P, Q) -> R> F.invoke(q: Q): (P) -> R = { p: P -> this(p, q) }
