@@ -16,14 +16,15 @@
 package util.data
 
 import org.junit.Test
+import util.comb
 import util.data.EitherImpl.Companion.fn
 import util.data.EitherImpl.Companion.map
 import util.data.EitherImpl.Companion.pure
-import util.data.MonadLawTestSupport.FunctorCompositionLaw.f
-import util.data.MonadLawTestSupport.FunctorCompositionLaw.g
 import util.data.MonadLawTestSupport.FunctorIdentity.id
 import util.plus
 import util.shouldBe
+import util.data.MonadLawTestSupport.FunctorCompositionLaw as FC
+import util.data.MonadLawTestSupport.MonadAssociativity as MA
 import util.data.MonadLawTestSupport.MonadLeftIdentity as LI
 import util.data.MonadLawTestSupport.MonadRightIdentity as RI
 
@@ -50,7 +51,7 @@ class EitherTest {
      */
     @Test fun functorFuncCombination() =
             listOf<Either<String, List<String>>>(pure(listOf("test", "functor", "maybe")), Left("left"))
-                    .let { it to (lsp.map(f + g) to (rsp1.map(f) + rsp2.map(g))) }
+                    .let { it to (lsp.map(FC.f + FC.g) to (rsp1.map(FC.f) + rsp2.map(FC.g))) }
                     .let { p -> p.first.map { p.second.first(it) to p.second.second(it) } }
                     .forEach { it.first shouldBe it.second }
 
@@ -85,4 +86,29 @@ class EitherTest {
             listOf<Either<Int, Int>>(Right(1), Left(-1), Right(0), Left(1), Right(-1), Left(0))
                     .map { RI.left(it) to it }
                     .forEach { it.first shouldBe it.second }
+
+    /**
+     * A test that [Either] satisfies monad law(Associativity).
+     *
+     * <pre><code>
+     *     (m >>= f) >>= g = m >>= (\x -> f x >>= g)
+     * </code></pre>
+     */
+    @Test fun monadAssociativity() =
+            (listOf(rf, lf) comb listOf("EitherOf", "", "either", "EITHER"))
+                    .map { it.first(it.second) }
+                    .map { MA.left(f, g)(it) to MA.right(f, g)(it) }
+                    .forEach { it.first shouldBe it.second }
+
+    val lf: (String) -> Either<String, String> = ::Left
+
+    val rf: (String) -> Either<String, String> = ::Right
+
+    val f: (String) -> Either<String, List<Char>> = { if (it.length > 0) Right(it.toCharArray().toList()) else Left(it) }
+
+    val g: (List<Char>) -> Either<String, String> = { gfn(it) }
+
+    fun gfn(list: List<Char>): Either<String, String> =
+            list.filter(Char::isUpperCase)
+                    .let { if (it.size == 0) Left(list.joinToString("")) else Right(it.joinToString("")) }     
 }

@@ -72,6 +72,48 @@ class MonadLawTestSupport {
                         .then { it(obj) }
                         ?: throw IllegalStateException("instance information is not available.")
     }
+
+    object MonadAssociativity {
+        inline fun <M: Monad, reified I: Monad.Kind1Instance<M, I>, T1, T2, T3> left(
+                noinline f: (T1) -> Type.Kind1<M, I, T2>,
+                noinline g: (T2) -> Type.Kind1<M, I, T3>,
+                kc: KClass<I> = I::class,
+                instance: I? = kc.objectInstance
+        ): (Type.Kind1<M, I, T1>) -> Type.Kind1<M, I, T3> =
+                instance.then { it.fn<T1, T2>() to it.fn<T2, T3>() }
+                        .then { it.first.bind(f) to it.second.bind(g) }
+                        .then { p -> { m: Type.Kind1<M,I,T1> -> p.second(p.first(m)) } }
+                        ?: throw IllegalStateException("instance information is not available.")
+
+        inline fun <M: Monad, reified I: Monad.Kind2Instance<M, I>, S, T1, T2, T3> left(
+                noinline f: (T1) -> Type.Kind2<M, I, S, T2>,
+                noinline g: (T2) -> Type.Kind2<M, I, S, T3>,
+                kc: KClass<I> = I::class,
+                instance: I? = kc.objectInstance
+        ): (Type.Kind2<M, I, S, T1>) -> Type.Kind2<M, I, S, T3> =
+                instance.then { it.fn<T1, S, T2>() to it.fn<T2, S, T3>() }
+                        .then { it.first.bind(f) to it.second.bind(g) }
+                        .then { p -> { m: Type.Kind2<M, I, S, T1> -> p.second(p.first(m)) } }
+                        ?: throw IllegalStateException("instance information is not available.")
+
+        inline fun <M: Monad, reified I: Monad.Kind1Instance<M, I>, T1, T2, T3> right(
+                noinline f: (T1) -> Type.Kind1<M, I, T2>,
+                noinline g: (T2) -> Type.Kind1<M, I, T3>,
+                kc: KClass<I> = I::class,
+                instance: I? = kc.objectInstance
+        ): (Type.Kind1<M, I, T1>) -> Type.Kind1<M, I, T3> =
+                instance.then { i -> { m: Type.Kind1<M, I, T1> -> i.bind(m) { i.bind(f(it), g) } } }
+                        ?: throw IllegalStateException("instance information is not available.")
+
+        inline fun <M: Monad, reified I: Monad.Kind2Instance<M, I>, S, T1, T2, T3> right(
+                noinline f: (T1) -> Type.Kind2<M, I, S, T2>,
+                noinline g: (T2) -> Type.Kind2<M, I, S, T3>,
+                kc: KClass<I> = I::class,
+                instance: I? = kc.objectInstance
+        ): (Type.Kind2<M, I, S, T1>) -> Type.Kind2<M, I, S, T3> =
+                instance.then { i -> { m: Type.Kind2<M, I, S, T1> -> i.bind(m) { i.bind(f(it), g) } } }
+                        ?: throw IllegalStateException("instance information is not available.")
+    }
 }
 
 infix operator fun <P, Q, R, S, F:(P) -> Q, G: (Q,R) -> S> F.plus(g: G): (P, R) -> S = { p, r -> g(this(p), r) }
