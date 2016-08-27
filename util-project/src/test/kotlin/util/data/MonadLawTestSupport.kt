@@ -50,6 +50,28 @@ class MonadLawTestSupport {
                         .then { (it.pure + it.bind)(f) }
                         ?: throw IllegalStateException("instance information is not available.")
     }
+
+    object MonadRightIdentity {
+        inline fun <M: Monad, reified I: Monad.Kind1Instance<M, I>, T> left(
+                obj: Type.Kind1<M, I, T>,
+                kc: KClass<I> = I::class,
+                instance: I? = kc.objectInstance
+        ): Type.Kind1<M, I, T> =
+                instance.then { it.fn<T, T>() }
+                        .then { it.bind(it.pure) }
+                        .then { it(obj) }
+                        ?: throw IllegalStateException("instance information is not available.")
+
+        inline fun <M: Monad, reified I: Monad.Kind2Instance<M, I>, S, T> left(
+                obj: Type.Kind2<M, I, S, T>,
+                kc: KClass<I> = I::class,
+                instance: I? = kc.objectInstance
+        ): Type.Kind2<M, I, S, T> =
+                instance.then { it.fn<T, S, T>() }
+                        .then { it.bind(it.pure) }
+                        .then { it(obj) }
+                        ?: throw IllegalStateException("instance information is not available.")
+    }
 }
 
 infix operator fun <P, Q, R, S, F:(P) -> Q, G: (Q,R) -> S> F.plus(g: G): (P, R) -> S = { p, r -> g(this(p), r) }
