@@ -15,9 +15,8 @@
  */
 package util.type
 
+//import util.data.MaybeType
 import org.junit.Test
-import util.data.MaybeType
-import util.initBy
 import util.shouldBe
 import util.then
 import util.unit
@@ -25,17 +24,17 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import kotlin.reflect.KClass
 
-class TypeTest {
-
-    @Test fun gettingGenericType() =
-            (object : Generics<MaybeType>() {})
-                    .initBy { it.superType.let { "super type: [$it]" }.initBy(::println) }
-                    .initBy { it.showSuperTypeImpl() }
-                    .initBy { it.showOwnerType() }
-                    .initBy { it.showRawType() }
-                    .initBy { it.showActualTypeArguments() }
-                    .unit
-}
+//class TypeTest {
+//
+//    @Test fun gettingGenericType() =
+//            (object : Generics<MaybeType>() {})
+//                    .initBy { it.superType.let { "super type: [$it]" }.initBy(::println) }
+//                    .initBy { it.showSuperTypeImpl() }
+//                    .initBy { it.showOwnerType() }
+//                    .initBy { it.showRawType() }
+//                    .initBy { it.showActualTypeArguments() }
+//                    .unit
+//}
 
 abstract class Generics<T> {
 
