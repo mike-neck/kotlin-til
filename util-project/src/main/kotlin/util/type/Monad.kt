@@ -15,37 +15,35 @@
  */
 package util.type
 
-import util.type.Type.*
-
 interface Monad: Functor {
 
     interface Kind1Instance<M: Monad, I: Kind1Instance<M, I>>: Functor.Kind1Instance<M, I> {
-        fun <T, R> bind(obj: Kind1<M, I, T>, func: (T) -> Kind1<M, I, R>): Kind1<M, I, R>
-        fun <T> pure(value: T): Kind1<M, I, T>
+        fun <T, R> bind(obj: Type.Kind1<M, I, T>, func: (T) -> Type.Kind1<M, I, R>): Type.Kind1<M, I, R>
+        fun <T> pure(value: T): Type.Kind1<M, I, T>
         override fun <T, R> fn(): Support<M, I, T, R>
         interface Support<M: Monad, I: Kind1Instance<M, I>, T, R>: Functor.Kind1Instance.Support<M, I, T, R> {
-            val bind: (Kind1<M, I, T>, (T) -> Kind1<M, I, R>) -> Kind1<M, I, R>
-            val pure: (T) -> Kind1<M, I, T>
+            val bind: (Type.Kind1<M, I, T>, (T) -> Type.Kind1<M, I, R>) -> Type.Kind1<M, I, R>
+            val pure: (T) -> Type.Kind1<M, I, T>
         }
     }
 
     interface Kind2Instance<M: Monad, I: Kind2Instance<M, I>>: Functor.Kind2Instance<M, I> {
-        fun <T, S, R> bind(obj: Kind2<M, I, S, T>, func: (T) -> Kind2<M, I, S, R>): Kind2<M, I, S, R>
-        fun <T, S> pure(value: T): Kind2<M, I, S, T>
+        fun <T, S, R> bind(obj: Type.Kind2<M, I, S, T>, func: (T) -> Type.Kind2<M, I, S, R>): Type.Kind2<M, I, S, R>
+        fun <T, S> pure(value: T): Type.Kind2<M, I, S, T>
         override fun <T, S, R> fn(): Support<M, I, T, S, R>
         interface Support<M: Monad, I: Kind2Instance<M, I>, T, S, R>: Functor.Kind2Instance.Support<M, I, T, S, R> {
-            val bind: (Kind2<M, I, S, T>, (T) -> Kind2<M, I, S, R>) -> Kind2<M, I, S, R>
-            val pure: (T) -> Kind2<M, I, S, T>
+            val bind: (Type.Kind2<M, I, S, T>, (T) -> Type.Kind2<M, I, S, R>) -> Type.Kind2<M, I, S, R>
+            val pure: (T) -> Type.Kind2<M, I, S, T>
         }
     }
 
     interface Kind3Instance<M: Monad, I: Kind3Instance<M, I>>: Functor.Kind3Instance<M, I> {
-        fun <T, S1, S2, R> bind(obj: Kind3<M, I, S1, S2, T>, func: (T) -> Kind3<M, I, S1, S2, R>): Kind3<M, I, S1, S2, R>
-        fun <T, S1, S2> pure(value: T): Kind3<M, I, S1, S2, T>
+        fun <T, S1, S2, R> bind(obj: Type.Kind3<M, I, S1, S2, T>, func: (T) -> Type.Kind3<M, I, S1, S2, R>): Type.Kind3<M, I, S1, S2, R>
+        fun <T, S1, S2> pure(value: T): Type.Kind3<M, I, S1, S2, T>
         override fun <T, S1, S2, R> fn(): Support<M, I, T, S1, S2, R>
         interface Support<M: Monad, I: Kind3Instance<M, I>, T, S1, S2, R>: Functor.Kind3Instance.Support<M, I, T, S1, S2, R> {
-            val bind: (Kind3<M, I, S1, S2, T>, (T) -> Kind3<M, I, S1, S2, R>) -> Kind3<M, I, S1, S2, R>
-            val pure: (T) -> Kind3<M, I, S1, S2, T>
+            val bind: (Type.Kind3<M, I, S1, S2, T>, (T) -> Type.Kind3<M, I, S1, S2, R>) -> Type.Kind3<M, I, S1, S2, R>
+            val pure: (T) -> Type.Kind3<M, I, S1, S2, T>
         }
     }
 }
