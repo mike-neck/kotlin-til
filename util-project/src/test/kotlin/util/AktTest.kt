@@ -23,21 +23,44 @@ import util.data.StateMonad as S
 
 class AktTest {
 
-    @Test fun aktOnMaybe() = akt<MaybeType, M, Int, Int, Int>(
-            { M.pure(1) },
-            { it: Int -> M.pure(it * 2) },
-            { it: Int -> M.pure(it + 1) }
-    ) shouldBe Just(3)
+    /**
+     * <code><pre>
+     *     aktOnEither = do
+     *         x <- return "EitherStringString"
+     *         y <- countUpperCase x
+     *         if (y == 0) then (Left x) else return y
+     * </pre></code>
+     */
+//    @Test fun aktOnEither() = akt<EitherType, E, String, String, Int, Int>(
+//            { E.pure<String, String>("EitherStringString") },
+//            { s: String -> s.toCharArray().filter(Char::isUpperCase).count().let { if (it == 0) Left<String, Int>(s) else Right(it) } },
+//            { E.pure(it * it) }
+//    ) shouldBe Right(9)
 
-    @Test fun aktOnEither() = akt<EitherType, E, String, String, Int, Int>(
-            { E.pure<String, String>("EitherStringString") },
-            { s: String -> s.toCharArray().filter(Char::isUpperCase).count().let { if (it == 0) Left<String, Int>(s) else Right(it) } },
-            { E.pure(it * it) }
-    ) shouldBe Right(9)
+    /**
+     * <code><pre>
+     *     aktOnState = do
+     *         x <- get
+     *         put(x + 1)
+     *         return 10
+     *     
+     *     test = runState aktOnState 1
+     * </pre></code>
+     */
+    @Test fun aktOnState() = akt(S.get<Int>())[
+            { S.put(it + 1) }][
+            { S.pure<Int, Int>(10) }].let { S.runState(it(), 1) } shouldBe (10 to 2)
 
-    @Test fun aktOnState() = akt<StateType, S, Int, Int, Unit, Int>(
-            { S.get<Int>() },
-            { S.put(it + 1) },
-            { S.pure<Int, Int>(10) }
-    ).let { S.runState(it, 1) }
+    /**
+     * <code><pre>
+     *     aktOnMaybe :: Maybe Int
+     *     aktOnMaybe = do
+     *         x <- return 10
+     *         y <- return (x * 2)
+     *         return (y + 1)
+     * </pre></code>
+     */
+    @Test fun aktOnMaybe() = akt( M.pure(1) )[
+            { M.pure(it * 2) }][
+            { M.pure(it + 1) }]() shouldBe Just(3)
 }
