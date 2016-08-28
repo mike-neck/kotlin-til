@@ -20,7 +20,9 @@ import util.type.Monad
 import util.type.Type
 import kotlin.reflect.KClass
 
-class MonadLawTestSupport {
+object MonadLawTestSupport {
+
+    fun <T, R> Pair<T, T>.each(f: (T) -> R): Pair<R, R> = f(this.first) to f(this.second)
 
     object FunctorIdentity {
         fun <T> id(): (T) -> T = { it }

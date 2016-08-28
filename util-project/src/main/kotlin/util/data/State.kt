@@ -22,6 +22,8 @@ interface StateType: Monad
 
 typealias State<S, T> = Type.Kind2<StateType, StateImpl.Companion, S, T>
 
+typealias StateSupport<S, T, R> = Monad.Kind2Instance.Support<StateType, StateImpl.Companion, T, S, R>
+
 typealias StateMonad = StateImpl.Companion
 
 class StateImpl<S, T>(val state: (S) -> Pair<T, S>): Type.Kind2<StateType, StateImpl.Companion, S, T>() {
@@ -32,8 +34,8 @@ class StateImpl<S, T>(val state: (S) -> Pair<T, S>): Type.Kind2<StateType, State
 
     companion object: Monad.Kind2Instance<StateType, StateImpl.Companion> {
 
-        override fun <T, S, R> fn(): Monad.Kind2Instance.Support<StateType, Companion, T, S, R> =
-                object: Monad.Kind2Instance.Support<StateType, Companion, T, S, R> {
+        override fun <T, S, R> fn(): StateSupport<S, T, R> =
+                object: StateSupport<S, T, R> {
 
                     override val map: (State<S, T>, (T) -> R) -> State<S, R>
                         get() = { o, f -> Companion.map(o, f) }
@@ -56,5 +58,23 @@ class StateImpl<S, T>(val state: (S) -> Pair<T, S>): Type.Kind2<StateType, State
                 else illegalArgument(obj)
 
         override fun <T, S> pure(value: T): State<S, T> = StateImpl { value to it }
+
+        fun <T, S> state(f: (S) -> Pair<T, S>): State<S, T> = StateImpl(f)
+
+        fun <T, S> runState(state: State<S, T>, initial: S): Pair<T, S> =
+                if (state is StateImpl) state.state(initial)
+                else throw IllegalArgumentException("argument is not State.")
+
+        fun <T, S> evalState(state: State<S, T>, initial: S): T =
+                if (state is StateImpl) state.eval(initial)
+                else throw IllegalArgumentException("argument is not State.")
+
+        fun <T, S> execState(state: State<S, T>, initial: S): S =
+                if (state is StateImpl) state.exec(initial)
+                else throw IllegalArgumentException("argument is not State.")
+
+        fun <S> get(): State<S, S> = StateImpl { it to it }
+
+        fun <S> put(st: S): State<S, Unit> = StateImpl { Unit to st }
     }
 }

@@ -19,6 +19,7 @@ import org.junit.Test
 import util.data.*
 import util.data.EitherMonad as E
 import util.data.MaybeMonad as M
+import util.data.StateMonad as S
 
 class AktTest {
 
@@ -33,4 +34,10 @@ class AktTest {
             { s: String -> s.toCharArray().filter(Char::isUpperCase).count().let { if (it == 0) Left<String, Int>(s) else Right(it) } },
             { E.pure(it * it) }
     ) shouldBe Right(9)
+
+    @Test fun aktOnState() = akt<StateType, S, Int, Int, Unit, Int>(
+            { S.get<Int>() },
+            { S.put(it + 1) },
+            { S.pure<Int, Int>(10) }
+    ).let { S.runState(it, 1) }
 }
