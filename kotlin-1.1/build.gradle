@@ -1,0 +1,31 @@
+buildscript {
+    repositories {
+        maven {
+            url kotlinDevRepo
+        }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "$kotlinGroup:$kotlinPlugin:$kotlinVersion"
+    }
+}
+
+apply plugin: 'kotlin'
+
+repositories {
+    maven {
+        url kotlinDevRepo
+    }
+    maven {
+        url ktCoroutineRepo
+    }
+    mavenCentral()
+}
+
+dependencies {
+    compile "$kotlinGroup:$kotlinStdLib:$kotlinVersion"
+    [ktAsyncLib, ktGenLib, ktRxLib].each {
+        compile "$ktCoroutineGrp:$it:$ktCoroutineVer"
+    }
+    testCompile 'junit:junit:4.12'
+}
