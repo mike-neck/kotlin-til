@@ -1,0 +1,3 @@
+include 'kt-1.1.2-4'
+
+rootProject.name = 'kotlin-versions'
