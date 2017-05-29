@@ -19,6 +19,8 @@ import java.io.IOException
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 import kotlin.reflect.KClass
+import kotlin.reflect.full.functions
+import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.jvmName
 
 //import org.junit.jupiter.api.Test
@@ -52,24 +54,38 @@ class KotlinFilesTest {
     }
 
     class ClassAnalyze(val kClass: KClass<*>) {
-        val abstract: Try<Boolean> get() = try { Succeed(kClass.isAbstract) } catch (e: UnsupportedOperationException) { Fail() }
-        val final: Try<Boolean> get() = try { Succeed(kClass.isFinal) } catch (e: UnsupportedOperationException) { Fail() }
-        val companion: Try<Boolean> get() = try { Succeed(kClass.isCompanion) } catch (e: UnsupportedOperationException) { Fail() }
-        val data: Try<Boolean> get() = try { Succeed(kClass.isData) } catch (e: UnsupportedOperationException) { Fail() }
-        val open: Try<Boolean> get() = try { Succeed(kClass.isOpen) } catch (e: UnsupportedOperationException) { Fail() }
-        val sealed: Try<Boolean> get() = try { Succeed(kClass.isSealed) } catch (e: UnsupportedOperationException) { Fail() }
-        val inner: Try<Boolean> get() = try { Succeed(kClass.isInner) } catch (e: UnsupportedOperationException) { Fail() }
+        val abstract: Try<Boolean> get() = Try.of { kClass.isAbstract }
+        val final: Try<Boolean> get() = Try.of { kClass.isFinal }
+        val companion: Try<Boolean> get() = Try.of { kClass.isCompanion }
+        val data: Try<Boolean> get() = Try.of { kClass.isData }
+        val open: Try<Boolean> get() = Try.of { kClass.isOpen }
+        val sealed: Try<Boolean> get() = Try.of { kClass.isSealed }
+        val inner: Try<Boolean> get() = Try.of { kClass.isInner }
+
+        val annotations: Try<Int> get() = Try.of { kClass.annotations.size }
+        val constructors: Try<Int> get() = Try.of { kClass.constructors.size }
+        val members: Try<Int> get() = Try.of { kClass.members.size }
+        val functions: Try<Int> get() = Try.of { kClass.functions.size }
+        val memberProperties: Try<Int> get() = Try.of { kClass.memberProperties.size }
+        val objectInstance: Try<Boolean> get() = Try.of { kClass.objectInstance?.let { true }?: false }
 
         override fun toString(): String =
-                "ClassAnalyze(class[${kClass.jvmName}]->" +
-                        "abstract[$abstract]," +
-                        "final[$final]," +
-                        "companion[$companion]," +
-                        "data[$data]," +
-                        "open[$open]," +
-                        "sealed[$sealed]," +
-                        "inner[$inner]" +
-                        ")"
+                "ClassAnalyze " +
+                        "[${kClass.jvmName}]\n" +
+                        "  abstract[$abstract], " +
+                        "final[$final], " +
+                        "companion[$companion], " +
+                        "data[$data]\n" +
+                        "  open[$open], " +
+                        "sealed[$sealed], " +
+                        "inner[$inner]\n" +
+                        "  annotations[$annotations], " +
+                        "constructors[$constructors], " +
+                        "members[$members]\n" +
+                        "  functions[$functions], " +
+                        "memberProperties[$memberProperties], " +
+                        "objectInstance[$objectInstance]" +
+                        "\n"
     }
 
     companion object {
@@ -93,6 +109,9 @@ class KotlinFilesTest {
 
 sealed class Try<out T> {
     abstract val error: Boolean
+    companion object {
+        fun <T> of(evaluate: () -> T): Try<T> = try { Succeed(evaluate()) } catch (e: Throwable) { Fail() } 
+    }
 }
 
 class Fail<out T>: Try<T>() {
