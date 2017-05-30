@@ -54,6 +54,8 @@ class KotlinFilesTest {
     }
 
     class ClassAnalyze(val kClass: KClass<*>) {
+        val java: Class<*> get() = kClass.java
+
         val abstract: Try<Boolean> get() = Try.of { kClass.isAbstract }
         val final: Try<Boolean> get() = Try.of { kClass.isFinal }
         val companion: Try<Boolean> get() = Try.of { kClass.isCompanion }
@@ -69,9 +71,13 @@ class KotlinFilesTest {
         val memberProperties: Try<Int> get() = Try.of { kClass.memberProperties.size }
         val objectInstance: Try<Boolean> get() = Try.of { kClass.objectInstance?.let { true }?: false }
 
+        val annotationClass: Try<Boolean> get() = Try.of { java.isAnnotation }
+        val anonymous: Try<Boolean> get() = Try.of { java.isAnonymousClass }
+
         override fun toString(): String =
                 "ClassAnalyze " +
                         "[${kClass.jvmName}]\n" +
+                        "-- KClass inspection --\n" +
                         "  abstract[$abstract], " +
                         "final[$final], " +
                         "companion[$companion], " +
@@ -84,7 +90,10 @@ class KotlinFilesTest {
                         "members[$members]\n" +
                         "  functions[$functions], " +
                         "memberProperties[$memberProperties], " +
-                        "objectInstance[$objectInstance]" +
+                        "objectInstance[$objectInstance]\n" +
+                        "-- Java Class inspection --\n" +
+                        "annotation class[$annotationClass], " +
+                        "anonymous[$anonymous]" +
                         "\n"
     }
 

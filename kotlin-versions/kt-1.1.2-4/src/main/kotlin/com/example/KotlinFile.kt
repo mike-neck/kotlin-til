@@ -56,6 +56,11 @@ class Qux {
 
 class Quux(val name: String) {
     constructor(q: Qux): this(q.prop)
+    class NotInner
+    fun createInner(): Any {
+        class Inner
+        return Inner()
+    }
 }
 
 interface Garply {
@@ -67,6 +72,12 @@ interface Garply {
         override val waldo: String = "waldo"
     }
 }
+
+val garply = object : Garply {
+    override val waldo: String get() = "waldo"
+}
+
+data class Impl(override val waldo: String): Garply
 
 object Vip
 
@@ -87,3 +98,6 @@ enum class Bool(val asBoolean: Boolean) {
         fun list(): List<Bool> = values().toList()
     }
 }
+
+sealed class Sealed
+class Final: Sealed()
