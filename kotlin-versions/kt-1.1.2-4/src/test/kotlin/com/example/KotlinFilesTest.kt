@@ -21,6 +21,8 @@ import java.nio.file.attribute.BasicFileAttributes
 import kotlin.reflect.KClass
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.full.staticFunctions
 import kotlin.reflect.jvm.jvmName
 
 //import org.junit.jupiter.api.Test
@@ -71,6 +73,10 @@ class KotlinFilesTest {
         val memberProperties: Try<Int> get() = Try.of { kClass.memberProperties.size }
         val objectInstance: Try<Boolean> get() = Try.of { kClass.objectInstance?.let { true }?: false }
 
+        val primaryCtor: Try<Boolean> get() = Try.of { kClass.primaryConstructor?.let { true }?: false }
+        val nestedClass: Try<Int> get() = Try.of { kClass.nestedClasses.size }
+        val staticFunctions: Try<Int> get() = Try.of { kClass.staticFunctions.size }
+
         val annotationClass: Try<Boolean> get() = Try.of { java.isAnnotation }
         val anonymous: Try<Boolean> get() = Try.of { java.isAnonymousClass }
 
@@ -91,6 +97,9 @@ class KotlinFilesTest {
                         "  functions[$functions], " +
                         "memberProperties[$memberProperties], " +
                         "objectInstance[$objectInstance]\n" +
+                        "  primaryCtor[$primaryCtor], " +
+                        "nestedClass[$nestedClass], " +
+                        "staticFunctions[$staticFunctions]\n" +
                         "-- Java Class inspection --\n" +
                         "annotation class[$annotationClass], " +
                         "anonymous[$anonymous]" +

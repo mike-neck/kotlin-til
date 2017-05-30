@@ -16,6 +16,10 @@
 package com.example;
 
 public class IsIt {
-    public static class StaticInner {}
+    static void call() {}
+
+    public static class StaticInner {
+        static void call(){}
+    }
     public class InstanceInner {}
 }

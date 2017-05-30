@@ -53,6 +53,15 @@ class Qux {
     }
 
     @ClassAnnotation
+    inner class Inner(val value: Int) {
+        val inner: Int = value * 2
+        fun inner(): Int = value * 2
+        inner class InChild {
+            fun value(): Int = this@Inner.value
+        }
+    }
+
+    @ClassAnnotation
     companion object {
         @ClassAnnotation
         @JvmStatic fun add(q: Qux, qx: Quux): Int =
@@ -60,6 +69,9 @@ class Qux {
         @ClassAnnotation
         fun garply(q: Quux): Garply = @ClassAnnotation object: Garply {
             override val waldo: String = q.name
+            inner class Inner {
+                val str: String = waldo
+            }
         }
         @ClassAnnotation
         fun boolean(b: Bool): String = when (b) {
@@ -78,8 +90,8 @@ class Quux(val name: String) {
     @ClassAnnotation
     fun createInner(): Any {
         @ClassAnnotation
-        class Inner
-        return Inner()
+        class ThisIsNotAlsoInner
+        return ThisIsNotAlsoInner()
     }
 }
 
@@ -97,7 +109,10 @@ interface Garply {
     companion object: Garply {
         @ClassAnnotation
         override val waldo: String = "waldo"
+        class Child
     }
+    @ClassAnnotation
+    class Child
 }
 
 @ClassAnnotation
@@ -110,7 +125,17 @@ val garply = @ClassAnnotation object : Garply {
 data class Impl(override val waldo: String): Garply
 
 @ClassAnnotation
-object Vip
+data class Data<out T: Any>(val value: T)
+
+@ClassAnnotation
+object Vip {
+    @ClassAnnotation
+    val vip: Vip = this
+    @ClassAnnotation
+    fun vip(): Vip = this
+    @ClassAnnotation
+    class Most
+}
 
 @ClassAnnotation
 annotation class Ano(val name: String)
@@ -122,15 +147,23 @@ enum class Ord {
     @ClassAnnotation
     EQ,
     @ClassAnnotation
-    GT
+    GT;
+    class Child
 }
 
 @ClassAnnotation
 enum class Bool(val asBoolean: Boolean) {
     @ClassAnnotation
-    OK(true ){ @ClassAnnotation override val int: Int = 1 },
+    OK(true ){ 
+        @ClassAnnotation override val int: Int = 1
+        @ClassAnnotation class Child
+//        @ClassAnnotation inner class Bob // できないらしい
+    },
     @ClassAnnotation
-    NG(false){ @ClassAnnotation override val int: Int = 0 };
+    NG(false){ 
+        @ClassAnnotation override val int: Int = 0
+        @ClassAnnotation class Hero
+    };
     @ClassAnnotation
     abstract val int: Int
 
@@ -148,6 +181,26 @@ enum class Bool(val asBoolean: Boolean) {
 }
 
 @ClassAnnotation
-sealed class Sealed
+sealed class Sealed {
+    @ClassAnnotation
+    val sealedValue: Int = 0
+    @ClassAnnotation
+    class SealedNested
+}
 @ClassAnnotation
 class Final: Sealed()
+
+@ClassAnnotation
+abstract class Abs {
+    @ClassAnnotation
+    abstract val abs: Int
+    @ClassAnnotation
+    companion object
+}
+
+@ClassAnnotation
+enum class Bounds(val asInt: Int) {
+    MAX(1), MIN(0);
+    fun reverse(): Int = - asInt
+    fun ord(): Int = asInt
+}
