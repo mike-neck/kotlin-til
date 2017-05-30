@@ -17,15 +17,22 @@
 
 package com.example
 
+import com.example.annotations.ClassAnnotation
 import java.io.Closeable
 
+@ClassAnnotation
 fun foo(bar: String): String = bar.toUpperCase()
+@ClassAnnotation
 val baz: Int = foo("baz").length
 
+@ClassAnnotation
 class Qux {
+    @ClassAnnotation
     val prop: String = "ooo"
+    @ClassAnnotation
     fun function(t: Int, msg: String): List<String> =
             if (t < 0) emptyList() else (1..t).map { "$msg$it" }
+    @ClassAnnotation
     fun <R: Closeable> R.tryAndClose(action: (R) -> Unit) {
         try {
             action(this)
@@ -33,20 +40,28 @@ class Qux {
             this.close()
         }
     }
+    @ClassAnnotation
     val Quux.id: String
+        @ClassAnnotation
         get() = this.name
+    @ClassAnnotation
     fun Qux.foop(): String = this.prop.plus(this.toString())
+    @ClassAnnotation
     fun bool(b: Bool): Boolean = when(b) {
         Bool.OK -> true
         Bool.NG -> false
     }
 
+    @ClassAnnotation
     companion object {
+        @ClassAnnotation
         @JvmStatic fun add(q: Qux, qx: Quux): Int =
                 q.prop.length + qx.name.length
-        fun garply(q: Quux): Garply = object: Garply {
+        @ClassAnnotation
+        fun garply(q: Quux): Garply = @ClassAnnotation object: Garply {
             override val waldo: String = q.name
         }
+        @ClassAnnotation
         fun boolean(b: Bool): String = when (b) {
             Bool.OK -> "true"
             Bool.NG -> "false"
@@ -54,50 +69,85 @@ class Qux {
     }
 }
 
+@ClassAnnotation
 class Quux(val name: String) {
+    @ClassAnnotation
     constructor(q: Qux): this(q.prop)
+    @ClassAnnotation
     class NotInner
+    @ClassAnnotation
     fun createInner(): Any {
+        @ClassAnnotation
         class Inner
         return Inner()
     }
 }
 
+@ClassAnnotation
 interface Garply {
+    @ClassAnnotation
     val waldo: String
+    @ClassAnnotation
     fun lorem(q: Qux): Quux = Quux(q.prop)
+    @ClassAnnotation
     val dp: Int
+        @ClassAnnotation
         get() = 1
+    @ClassAnnotation
     companion object: Garply {
+        @ClassAnnotation
         override val waldo: String = "waldo"
     }
 }
 
-val garply = object : Garply {
+@ClassAnnotation
+val garply = @ClassAnnotation object : Garply {
+    @ClassAnnotation
     override val waldo: String get() = "waldo"
 }
 
+@ClassAnnotation
 data class Impl(override val waldo: String): Garply
 
+@ClassAnnotation
 object Vip
 
+@ClassAnnotation
 annotation class Ano(val name: String)
 
+@ClassAnnotation
 enum class Ord {
-    LT,EQ,GT
+    @ClassAnnotation
+    LT,
+    @ClassAnnotation
+    EQ,
+    @ClassAnnotation
+    GT
 }
+
+@ClassAnnotation
 enum class Bool(val asBoolean: Boolean) {
-    OK(true ){ override val int: Int = 1 },
-    NG(false){ override val int: Int = 0 };
+    @ClassAnnotation
+    OK(true ){ @ClassAnnotation override val int: Int = 1 },
+    @ClassAnnotation
+    NG(false){ @ClassAnnotation override val int: Int = 0 };
+    @ClassAnnotation
     abstract val int: Int
 
+    @ClassAnnotation
     fun Vip.size(): Int = 10
+    @ClassAnnotation
     val Ano.size: Int
+        @ClassAnnotation
         get() = this.name.length
+    @ClassAnnotation
     companion object {
+        @ClassAnnotation
         fun list(): List<Bool> = values().toList()
     }
 }
 
+@ClassAnnotation
 sealed class Sealed
+@ClassAnnotation
 class Final: Sealed()
