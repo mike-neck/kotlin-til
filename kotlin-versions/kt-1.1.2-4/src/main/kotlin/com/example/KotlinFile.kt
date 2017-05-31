@@ -128,6 +128,14 @@ data class Impl(override val waldo: String): Garply
 data class Data<out T: Any>(val value: T)
 
 @ClassAnnotation
+open class Open<out T: Any>(val value: T) {
+    fun value(): T = value
+    inner class In {
+        fun value(): T = this@Open.value
+    }
+}
+
+@ClassAnnotation
 object Vip {
     @ClassAnnotation
     val vip: Vip = this
