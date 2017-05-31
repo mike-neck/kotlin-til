@@ -15,7 +15,10 @@
  */
 package com.example
 
-import java.io.IOException
+import org.junit.jupiter.api.Test
+import java.io.*
+import java.net.URI
+import java.nio.charset.StandardCharsets
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 import kotlin.reflect.KClass
@@ -140,4 +143,54 @@ class Fail<out T>: Try<T>() {
 class Succeed<out T>(val boolean: T): Try<T>() {
     override val error: Boolean = true
     override fun toString(): String = "Succ($boolean)"
+}
+
+object JavapKotlinFilesTest {
+
+    fun URI.asPath(): Path = Paths.get(this)
+
+    @JvmStatic
+    fun main(args: Array<String>): Unit {
+        val location = Ano::class.java.protectionDomain.codeSource.location ?: throw IllegalStateException()
+        val pkg = location.toURI().asPath().toAbsolutePath()
+        println(pkg)
+        val root = pkg.parent.parent.parent ?: throw IllegalStateException()
+        val visitor = Visitor(root)
+        Files.walkFileTree(pkg, visitor)
+        visitor.list()
+                .map { RunJavap(it, it.toString()) }
+                .map { it.file to it.getProcess(root) }
+                .map { it.first to
+                        Runnable { it.second.start().inputStream.use {
+                            it.bufferedReader(Charsets.UTF_8).forEachLine{ println(it) }
+                        } } }
+                .forEach { it.also { println() }.also { println(it.first) }.second.run() }
+    }
+
+    class Visitor(val root: Path): FileVisitor<Path> {
+
+        val list: MutableList<Path> = mutableListOf()
+
+        fun list(): List<Path> = list.toList()
+
+        override fun visitFile(file: Path?, attrs: BasicFileAttributes?): FileVisitResult =
+                FileVisitResult.CONTINUE
+                        .also { if (file != null && file.fileName.toString().endsWith(".class"))
+                            list.add(root.relativize(file)) }
+
+        override fun preVisitDirectory(dir: Path?, attrs: BasicFileAttributes?): FileVisitResult = FileVisitResult.CONTINUE
+
+        override fun postVisitDirectory(dir: Path?, exc: IOException?): FileVisitResult =
+                if (exc == null) FileVisitResult.CONTINUE else throw exc
+
+        override fun visitFileFailed(file: Path?, exc: IOException?): FileVisitResult =
+                if (exc == null) FileVisitResult.CONTINUE else throw exc
+    }
+
+    data class RunJavap(val file: Path, val path: String) {
+        val command: Array<String> get() = arrayOf("javap", "-p", "-c", "-l", path)
+        fun getProcess(root: Path): ProcessBuilder = ProcessBuilder(*command).directory(root.toFile())
+                .also { it.environment()["PATH"] =
+                        "/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${System.getenv("JAVA_HOME")}/bin" }
+    }
 }
