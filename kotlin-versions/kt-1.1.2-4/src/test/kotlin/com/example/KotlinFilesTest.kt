@@ -15,13 +15,13 @@
  */
 package com.example
 
-import org.junit.jupiter.api.Test
-import java.io.*
+import java.io.IOException
 import java.net.URI
-import java.nio.charset.StandardCharsets
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.jvm.internal.KotlinReflectionInternalError
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
@@ -192,5 +192,32 @@ object JavapKotlinFilesTest {
         fun getProcess(root: Path): ProcessBuilder = ProcessBuilder(*command).directory(root.toFile())
                 .also { it.environment()["PATH"] =
                         "/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${System.getenv("JAVA_HOME")}/bin" }
+    }
+}
+
+object CreateInstanceOfAnonymousClass {
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val clazz = Class.forName("com.example.KotlinClasses${'$'}garply${'$'}1")
+        val kClass = clazz.kotlin
+        val pctor: KFunction<Any> = kClass.primaryConstructor ?: throw IllegalStateException()
+        println(pctor)
+        println("isExternal -> ${pctor.isExternal}")
+        println("isInfix -> ${pctor.isInfix}")
+        println("isInline -> ${pctor.isInline}")
+        println("isOperator -> ${pctor.isOperator}")
+        println("isSuspend -> ${pctor.isSuspend}")
+        println("isAbstract -> ${pctor.isAbstract}")
+        println("isFinal -> ${pctor.isFinal}")
+        println("isOpen -> ${pctor.isOpen}")
+        println("visibility -> ${pctor.visibility}")
+        val result = pctor.call()
+        try {
+            println("call -> $result")
+        } catch(e: KotlinReflectionInternalError) {
+            println("cannot invoke this constructor.")
+        }
+//        println("isAccessible -> ${pctor.isAccessible}")
     }
 }
