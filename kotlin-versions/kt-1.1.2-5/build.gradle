@@ -1,0 +1,24 @@
+buildscript {
+    ext {
+        kotlinVersion = '1.1.2-5'
+    }
+    repositories {
+        kotlinDev(it)
+    }
+    dependencies {
+        classpath plugin(kotlinVersion)
+    }
+}
+
+apply plugin: kotlin
+apply plugin: junit5
+
+repositories {
+    kotlinDev(it)
+    mavenCentral()
+}
+
+dependencies {
+    compile stdlib(kotlinVersion)
+    compile reflect(kotlinVersion)
+}

@@ -2,6 +2,11 @@ ext {
     stdlib  = { String v -> "$jetbrainsKotlin:$kotlinStdlib:$v" }
     reflect = { String v -> "$jetbrainsKotlin:$kotlinReflect:$v" }
     plugin = { String v -> "$jetbrainsKotlin:$kotlinGradlePlugin:$v" }
+    kotlinDev = { RepositoryHandler rh -> 
+        rh.maven {
+            url 'https://dl.bintray.com/kotlin/kotlin-dev/'
+        }
+    }
 }
 
 subprojects {
