@@ -15,8 +15,10 @@
  */
 package com.example
 
+import com.example.ListCons.rem
 import com.example.Property.Companion.prop
 import java.util.*
+import kotlin.reflect.KClass
 
 object ListCons {
     val strings: List<String> = listOf("foo", "bar")
@@ -52,4 +54,42 @@ class Property<T>(val theme: String, val expression: () -> T, val property: (T) 
     interface Builder<T> {
         infix fun satisfy(property: (T) -> Unit): Property<T>
     } 
+}
+
+object Collector {
+    val items: MutableList<Describe> = mutableListOf()
+    fun appendDescription(describe: Describe): Boolean = items.add(describe)
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        println(IntSpec)
+        println(items.size)
+        items.flatMap { d -> d.properties.map { "${d.description}: ${it.theme}" } }.forEach { println(it) }
+    }
+}
+
+abstract class Describe(val description: String) {
+    init {
+        Collector.appendDescription(this)
+    }
+
+    val kClass: KClass<out Describe> get() = this::class
+
+    abstract val properties: List<Property<*>>
+}
+
+object IntSpec: Describe("integer") {
+    override val properties: List<Property<*>> get() = 
+    (prop("positive int is greater than 0") forAll { Random().nextInt(200) + 1 } satisfy { it > 0 }) %
+            (prop("negative int is less than 0") forAll { 0 - Random().nextInt(200) } satisfy { it < 0 }) % 
+            (prop("integer powered by two is greater than 0") forAll { Random().nextInt(400) - 200 } satisfy { it * it > 0 })
+}
+
+object AnotherLoadingSpec {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val specClass = Class.forName("com.example.IntSpec")?: throw IllegalStateException()
+        println(Collector.items.size)
+        Collector.items.flatMap { d -> d.properties.map { "${d.description}: ${it.theme}" } }.forEach { println(it) }
+    }
 }
