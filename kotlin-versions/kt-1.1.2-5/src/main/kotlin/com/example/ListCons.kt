@@ -88,7 +88,8 @@ object IntSpec: Describe("integer") {
 object AnotherLoadingSpec {
     @JvmStatic
     fun main(args: Array<String>) {
-        val specClass = Class.forName("com.example.IntSpec")?: throw IllegalStateException()
+        println(Collector.items.size)
+        Class.forName("com.example.IntSpec")?: throw IllegalStateException()
         println(Collector.items.size)
         Collector.items.flatMap { d -> d.properties.map { "${d.description}: ${it.theme}" } }.forEach { println(it) }
     }
